@@ -30,10 +30,10 @@ services:
       - './volumes/data/example:/data'
       - './volumes/config/example:/config'
     networks:
-      - traefix
+      - traefik
     labels:
       - 'traefik.enable=true'
-      - 'traefik.docker.network=traefix'
+      - 'traefik.docker.network=traefik'
       - 'traefik.http.routers.example-app.entrypoints=http'
       - 'traefik.http.routers.example-app-secure.tls=true'
       - 'traefik.http.routers.example-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
@@ -46,5 +46,5 @@ services:
       - 'traefik.http.services.example.loadbalancer.server.port=80'
 
 networks:
-  traefix:
+  traefik:
     external: true
