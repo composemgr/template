@@ -8,7 +8,7 @@ example
 
 ## 🚀 Services
 
-- **app**: example/server:latest
+- **app**: nginx:latest
 
 ## 📦 Installation
 
@@ -23,7 +23,8 @@ curl -q -LSsf "https://raw.githubusercontent.com/composemgr/template/main/docker
 ```bash
 git clone "https://github.com/composemgr/template" ~/.local/srv/docker/template
 cd ~/.local/srv/docker/template
-docker compose up -d
+cp default.env .env
+docker compose --env-file .env up -d
 ```
 
 ### Option 3: Using composemgr
@@ -38,19 +39,52 @@ composemgr install template
 
 ```shell
 TZ=America/New_York
-APP_SECRET_TOKEN_64=changeme_admin_token
-EMAIL_SERVER_HOST=172.17.0.1
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_MAIL_FROM=no-reply@${BASE_DOMAIN_NAME:-${BASE_HOST_NAME
-EMAIL_SERVER_FROM_ORG=example
+APP_SECRET_KEY=replace-with-a-random-16-byte-hex-string
 APP_ORG_NAME=example
+APP_SECRET_TOKEN_64=replace-with-a-random-64-byte-hex-string
+EMAIL_SERVER_HOST=172.17.0.1
+EMAIL_SERVER_MAIL_FROM=no-reply@example.com
+EMAIL_SERVER_PORT=587
 ```
 
 See `docker-compose.yaml` for complete list of configurable options.
 
+### Environment Files
+
+`default.env.sample` holds the full set of variables and is copied to `.env`
+before starting the stack:
+
+```bash
+cp default.env .env
+docker compose --env-file .env up -d
+```
+
+`app.env.sample` holds the app-specific overrides and is copied to `app.env`:
+
+```bash
+cp app.env.sample app.env
+```
+
+`composemgr up` applies `app.env` and `default.env` automatically. Raw
+`docker compose` commands need `--env-file .env` to pick up the same values.
+
+### Reverse Proxy
+
+Three standalone compose files ship in this repo:
+
+| File | Use |
+|------|-----|
+| `docker-compose.yaml` | Default, published on `172.17.0.1:64001` |
+| `docker-compose.traefik.yaml` | Behind an existing external `traefik` network |
+| `docker-compose.tunnel.yaml` | Behind an existing external `cloudflare` tunnel network |
+
+```bash
+docker compose -f docker-compose.traefik.yaml --env-file .env up -d
+```
+
 ## 🌐 Access
 
-- **Web Interface**: <http://172.17.0.1:59090>
+- **Web Interface**: <http://172.17.0.1:64001>
 
 ## 📂 Volumes
 
@@ -68,26 +102,26 @@ See `docker-compose.yaml` for complete list of configurable options.
 ## 🔍 Logging
 
 ```shell
-docker compose logs -f app
+docker compose --env-file .env logs -f app
 ```
 
 ## 🛠️ Management
 
 ```bash
 # Start services
-docker compose up -d
+docker compose --env-file .env up -d
 
 # Stop services
-docker compose down
+docker compose --env-file .env down
 
 # Update to latest images
-docker compose pull && docker compose up -d
+docker compose --env-file .env pull && docker compose --env-file .env up -d
 
 # View logs
-docker compose logs -f
+docker compose --env-file .env logs -f
 
 # Restart services
-docker compose restart
+docker compose --env-file .env restart
 ```
 
 ## 📋 Requirements
